@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>33rd Birthday Countdown & Journal</title>
+    <!-- Load Firebase Modules and Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configure Tailwind for a Futuristic, Minimalist look -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'bg-main': '#000000', // Pure Black
+                        'accent-neon': '#00ffff', // Cyan (Used for titles/buttons/general UI)
+                        
+                        // New Data Colors (Complementary)
+                        'data-cyan': '#00FFFF',
+                        'data-magenta': '#FF00FF',
+                        'data-yellow': '#FFFF00',
+                        'data-pink': '#FF33CC',
+
+                        'text-light': '#f0f0f0', // Near White
+                        'card-bg': '#050505', // Slightly off-black for depth
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'monospace', 'sans-serif'], // Monospace for digital feel
+                    },
+                    boxShadow: {
+                        // Sharp, glowing effect
+                        'neon': '0 0 15px rgba(0, 255, 255, 0.4), 0 0 1px rgba(0, 255, 255, 0.1)',
+                    },
+                    keyframes: {
+                        slideIn: {
+                            '0%': { transform: 'translateY(100%)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        slideOut: {
+                            '0%': { transform: 'translateY(0)', opacity: '1' },
+                            '100%': { transform: 'translateY(100%)', opacity: '0' },
+                        },
+                    },
+                    animation: {
+                        slideIn: 'slideIn 0.5s ease-out forwards',
+                        slideOut: 'slideOut 0.5s ease-in forwards',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Base styles for artistic contrast */
+        .neon-border {
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
+        }
+        
+        /* Minimalist Button Style */
+        .neon-button {
+            transition: all 0.2s;
+            background-color: transparent;
+            border: 2px solid var(--tw-accent-neon);
+            color: var(--tw-accent-neon);
+        }
+        .neon-button:hover {
+            background-color: rgba(0, 255, 255, 0.1);
+            box-shadow: var(--tw-shadow-neon);
+        }
+        .neon-button:active {
+            background-color: rgba(0, 255, 255, 0.2);
+        }
+
+        /* Journal List - Simple and high contrast */
+        #journal-list {
+            max-height: 45vh;
+            overflow-y: auto;
+            scrollbar-color: var(--tw-accent-neon) #111;
+            scrollbar-width: thin;
+            padding-right: 1rem; /* Space for scrollbar */
+        }
+        
+        /* Clean data display without background boxes */
+        .data-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+        }
+        /* Custom neon shadow for complementary colors */
+        .drop-shadow-neon-multi {
+             text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+        }
+    </style>
+</head>
+<body class="bg-bg-main text-text-light font-sans min-h-screen flex items-center justify-center p-4">
+
+    <!-- Main Container: Simple, high-contrast block -->
+    <div class="bg-card-bg p-8 md:p-16 rounded-lg shadow-neon max-w-7xl w-full border border-gray-900">
+        
+        <h1 class="text-3xl md:text-5xl font-extralight mb-10 text-accent-neon text-center tracking-widest">
+            PROJECT 33 // MANIFEST
+        </h1>
+
+        <div class="grid md:grid-cols-2 gap-12 md:gap-20">
+            
+            <!-- Left Column: Artistic Countdown Display -->
+            <div class="text-center md:border-r md:border-gray-800 md:pr-10">
+                <h2 class="text-xl font-thin mb-8 text-text-light tracking-widest">
+                    TARGET ACQUISITION: MAY '27
+                </h2>
+
+                <!-- Display Area for Time Units - Spacing adjusted: gap-8 and md:gap-16 applied -->
+                <div id="countdown-display" class="grid grid-cols-2 sm:grid-cols-4 gap-8 md:gap-16 mb-6">
+                    
+                    <!-- Days - CYAN -->
+                    <div class="data-unit">
+                        <div id="days" class="text-5xl md:text-6xl font-mono font-bold text-data-cyan tracking-tighter drop-shadow-neon-multi">000</div>
+                        <div class="text-sm md:text-base mt-2 text-gray-400 font-extralight">DAYS</div>
+                    </div>
+
+                    <!-- Hours - MAGENTA -->
+                    <div class="data-unit">
+                        <div id="hours" class="text-5xl md:text-6xl font-mono font-bold text-data-magenta tracking-tighter drop-shadow-neon-multi">00</div>
+                        <div class="text-sm md:text-base mt-2 text-gray-400 font-extralight">HRS</div>
+                    </div>
+
+                    <!-- Minutes - YELLOW -->
+                    <div class="data-unit">
+                        <div id="minutes" class="text-5xl md:text-6xl font-mono font-bold text-data-yellow tracking-tighter drop-shadow-neon-multi">00</div>
+                        <div class="text-sm md:text-base mt-2 text-gray-400 font-extralight">MIN</div>
+                    </div>
+
+                    <!-- Seconds - PINK -->
+                    <div class="data-unit">
+                        <div id="seconds" class="text-5xl md:text-6xl font-mono font-bold text-data-pink tracking-tighter drop-shadow-neon-multi">00</div>
+                        <div class="text-sm md:text-base mt-2 text-gray-400 font-extralight">SEC</div>
+                    </div>
+
+                </div>
+
+                <p id="message" class="text-xl text-green-400 font-semibold mt-10 hidden">
+                    🎉 MANIFEST COMPLETE!
+                </p>
+
+                <p id="user-id-display" class="mt-8 text-xs text-gray-700 font-mono break-all tracking-widest">
+                    ACCESS KEY: Initializing...
+                </p>
+            </div>
+            
+            <!-- Right Column: Journal Log - Minimalist & Functional -->
+            <div class="md:pl-10">
+                <h2 class="text-xl font-thin mb-6 text-text-light tracking-widest">
+                    JOURNAL LOG // ENCRYPTED
+                </h2>
+
+                <!-- Input Area -->
+                <div class="bg-card-bg p-4 rounded-md neon-border mb-6">
+                    <textarea 
+                        id="journal-input" 
+                        rows="3" 
+                        placeholder="Log new data entry..."
+                        class="w-full p-2 rounded-sm bg-bg-main text-text-light border border-gray-900 focus:ring-0 focus:border-accent-neon transition resize-none font-mono text-sm"
+                    ></textarea>
+                    <button 
+                        onclick="saveJournalEntry()"
+                        class="neon-button text-white font-semibold py-2 px-4 rounded-sm mt-3 w-full text-sm tracking-widest"
+                    >
+                        SAVE DATA ENTRY
+                    </button>
+                </div>
+
+                <!-- Entries Display -->
+                <div id="journal-list" class="space-y-4 pt-2">
+                    <p class="text-gray-700 text-center font-mono">Loading data stream...</p>
+                </div>
+            </div>
+
+        </div>
+        
+    </div>
+
+    <!-- Toast Notification - Minimalist Style -->
+    <div id="toast-notification" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 p-4 rounded-sm shadow-neon text-bg-main font-bold z-50 bg-accent-neon">
+        <span id="toast-message" class="tracking-wider">Notification message here!</span>
+    </div>
+
+    <!-- Daily Log Prompt Modal -->
+    <div id="daily-prompt-modal" class="hidden fixed inset-0 bg-bg-main bg-opacity-90 flex items-center justify-center z-40 p-4">
+        <div 
+            id="daily-prompt-card"
+            class="bg-card-bg p-8 w-full max-w-md rounded-lg shadow-neon border border-accent-neon opacity-0" 
+            style="animation-duration: 0.5s;"
+        >
+            <h3 class="text-3xl font-extralight text-accent-neon tracking-widest mb-4">
+                PROTOCOL ALERT
+            </h3>
+            <p class="text-lg text-text-light font-thin mb-6">
+                Daily data log missing. Maintain consistency: log your progress today.
+            </p>
+            <button 
+                onclick="dismissPrompt()"
+                class="neon-button text-white font-semibold py-2 px-4 rounded-sm mt-3 w-full text-sm tracking-widest"
+            >
+                ACKNOWLEDGE & DISMISS
+            </button>
+        </div>
+    </div>
+    <!-- End Daily Log Prompt Modal -->
+
+    <script type="module">
+        // --- FIREBASE IMPORTS AND SETUP ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Global environment variables provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db = null;
+        let auth = null;
+        let userId = null;
+        let isAuthReady = false;
+        
+        // Global variable for tracking the last log date for the daily prompt
+        let lastLogDate = null; 
+
+        // Helper function to check if two dates are the same day (ignoring time)
+        function isSameDay(d1, d2) {
+            return d1.getFullYear() === d2.getFullYear() &&
+                   d1.getMonth() === d2.getMonth() &&
+                   d1.getDate() === d2.getDate();
+        }
+
+        // Function to get the journal collection reference
+        const getJournalCollectionRef = (uid) => {
+            const path = `artifacts/${appId}/users/${uid}/journal_entries`;
+            return collection(db, path);
+        };
+        
+        // Function to display the daily log prompt
+        function checkDailyPrompt() {
+            const today = new Date();
+            const promptModal = document.getElementById('daily-prompt-modal');
+            
+            // If we have a last log date AND it is today, hide the prompt (if visible) and stop.
+            if (lastLogDate && isSameDay(lastLogDate, today)) {
+                promptModal.classList.add('hidden');
+                return;
+            }
+
+            // If no log exists for today. Show prompt.
+            if (promptModal.classList.contains('hidden')) {
+                promptModal.classList.remove('hidden');
+                
+                const promptCard = document.getElementById('daily-prompt-card');
+                promptCard.classList.add('animate-slideIn');
+                promptCard.classList.remove('opacity-0');
+            }
+        }
+        
+        // Function to dismiss the prompt modal (called by the button)
+        window.dismissPrompt = () => {
+            const promptModal = document.getElementById('daily-prompt-modal');
+            const promptCard = document.getElementById('daily-prompt-card');
+
+            promptCard.classList.remove('animate-slideIn');
+            promptCard.classList.add('animate-slideOut');
+
+            // Hide after animation finishes
+            setTimeout(() => {
+                promptModal.classList.add('hidden');
+                promptCard.classList.remove('animate-slideOut');
+                promptCard.classList.add('opacity-0'); // Reset opacity for next show
+            }, 500);
+        }
+
+
+        // --- AUTHENTICATION AND INITIALIZATION ---
+        async function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('Debug');
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        document.getElementById('user-id-display').textContent = `ACCESS KEY: ${userId}`;
+                        isAuthReady = true;
+                        window.showToast("Data link established.", false);
+                        loadJournalEntries(); // Start listening for data and run initial prompt check
+                    } else {
+                        // Attempt sign-in if not authenticated
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                window.showToast("SYSTEM ALERT: Initialization failed.", true);
+            }
+        }
+        
+        // --- JOURNAL LOGIC ---
+        window.saveJournalEntry = async () => {
+            if (!isAuthReady || !userId) {
+                window.showToast("Authentication not ready. Please wait.", true);
+                return;
+            }
+
+            const inputElement = document.getElementById('journal-input');
+            const entryText = inputElement.value.trim();
+
+            if (!entryText) {
+                window.showToast("SYSTEM ALERT: Input required.", true);
+                return;
+            }
+            
+            try {
+                await addDoc(getJournalCollectionRef(userId), {
+                    text: entryText,
+                    timestamp: serverTimestamp() 
+                });
+                
+                inputElement.value = ''; 
+                window.showToast("Log saved. Status: OK.", false);
+                dismissPrompt(); // Dismiss the prompt when a log is successfully saved
+            } catch (error) {
+                console.error("Firestore Save Error:", error);
+                window.showToast("SYSTEM ALERT: Save failed. See console.", true);
+            }
+        };
+
+        function loadJournalEntries() {
+            if (!isAuthReady || !userId) return;
+
+            const journalList = document.getElementById('journal-list');
+            const q = getJournalCollectionRef(userId);
+
+            onSnapshot(q, (snapshot) => {
+                let entries = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    entries.push({ id: doc.id, ...data });
+                });
+
+                // --- Client-side sorting by timestamp (descending) ---
+                // Firestore data should be sorted client-side to avoid index missing issues.
+                entries.sort((a, b) => {
+                    const timeA = a.timestamp ? (a.timestamp.toDate ? a.timestamp.toDate().getTime() : new Date(a.timestamp).getTime()) : 0;
+                    const timeB = b.timestamp ? (b.timestamp.toDate ? b.timestamp.toDate().getTime() : new Date(b.timestamp).getTime()) : 0;
+                    return timeB - timeA;
+                });
+                // -----------------------------------------------------
+
+                // Update lastLogDate and run the prompt check
+                if (entries.length > 0) {
+                    const latestTimestamp = entries[0].timestamp;
+                    if (latestTimestamp) {
+                        lastLogDate = latestTimestamp.toDate ? latestTimestamp.toDate() : new Date(latestTimestamp);
+                    }
+                } else {
+                    lastLogDate = null; // Reset if no entries exist
+                }
+                checkDailyPrompt();
+
+
+                journalList.innerHTML = ''; 
+
+                if (entries.length === 0) {
+                    journalList.innerHTML = '<p class="text-gray-700 text-center font-mono py-4">No data logs found. Begin manual entry.</p>';
+                    return;
+                }
+
+                entries.forEach(entry => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'p-3 rounded-sm bg-card-bg neon-border transition hover:bg-gray-900';
+                    
+                    const date = entry.timestamp ? (entry.timestamp.toDate ? entry.timestamp.toDate() : new Date(entry.timestamp)) : new Date();
+                    const formattedDate = date.toLocaleDateString('en-US', { 
+                        year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
+                    });
+
+                    entryDiv.innerHTML = `
+                        <p class="text-xs text-accent-neon font-mono mb-1 tracking-wider">${formattedDate} &gt;&gt;</p>
+                        <p class="text-text-light whitespace-pre-wrap font-mono text-sm">${entry.text}</p>
+                    `;
+                    journalList.appendChild(entryDiv);
+                });
+
+            }, (error) => {
+                console.error("Firestore Snapshot Error:", error);
+                window.showToast("SYSTEM ALERT: Data stream interruption.", true);
+            });
+        }
+
+        // --- COUNTDOWN LOGIC ---
+        const targetDateString = 'May 6, 2027 00:00:00';
+        let countdownInterval;
+
+        // Function to show toast notifications (global scope)
+        window.showToast = (message, isError = false) => {
+            const toast = document.getElementById('toast-notification');
+            const messageElement = document.getElementById('toast-message');
+            
+            toast.classList.remove('hidden', 'bg-accent-neon', 'bg-red-600');
+            toast.classList.add('animate-slideIn');
+            
+            if(isError) {
+                toast.classList.add('bg-red-600');
+                toast.classList.remove('text-bg-main');
+                messageElement.classList.add('text-text-light');
+            } else {
+                toast.classList.add('bg-accent-neon');
+                toast.classList.remove('text-text-light');
+                messageElement.classList.add('text-bg-main');
+            }
+
+            messageElement.textContent = message;
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('animate-slideIn');
+                toast.classList.add('animate-slideOut');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                    toast.classList.remove('animate-slideOut');
+                }, 500);
+            }, 3000);
+        };
+
+        function updateCountdownDisplay() {
+            const now = new Date().getTime();
+            const target = new Date(targetDateString).getTime();
+            const distance = target - now;
+
+            const $days = document.getElementById('days');
+            const $hours = document.getElementById('hours');
+            const $minutes = document.getElementById('minutes');
+            const $seconds = document.getElementById('seconds');
+            const $message = document.getElementById('message');
+
+            const MS_IN_DAY = 1000 * 60 * 60 * 24;
+            const MS_IN_HOUR = 1000 * 60 * 60;
+            const MS_IN_MINUTE = 1000 * 60;
+            const MS_IN_SECOND = 1000;
+
+            if (distance < 0) {
+                if (countdownInterval) clearInterval(countdownInterval);
+                $days.textContent = '000';
+                $hours.textContent = '00';
+                $minutes.textContent = '00';
+                $seconds.textContent = '00';
+                $message.classList.remove('hidden');
+                return;
+            }
+
+            const days = Math.floor(distance / MS_IN_DAY);
+            const hours = Math.floor((distance % MS_IN_DAY) / MS_IN_HOUR);
+            const minutes = Math.floor((distance % MS_IN_HOUR) / MS_IN_MINUTE);
+            const seconds = Math.floor((distance % MS_IN_MINUTE) / MS_IN_SECOND);
+
+            const pad = (n) => String(n).padStart(2, '0');
+            const padDays = (n) => String(n).padStart(3, '0');
+
+            $days.textContent = padDays(days);
+            $hours.textContent = pad(hours);
+            $minutes.textContent = pad(minutes);
+            $seconds.textContent = pad(seconds);
+            $message.classList.add('hidden');
+        }
+        
+        // --- LIFECYCLE STARTUP ---
+        window.onload = function() {
+            // 1. Start Firebase/Auth initialization
+            initializeFirebase();
+
+            // 2. Start Countdown Timer
+            updateCountdownDisplay();
+            countdownInterval = setInterval(updateCountdownDisplay, 1000);
+        };
+    </script>
+</body>
+</html>
