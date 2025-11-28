@@ -217,10 +217,20 @@
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // Global environment variables provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // --- FIREBASE CONFIGURATION (FOR GITHUB PAGES) ---
+        // Configuration provided by the user for project "countdown33-f592c".
+        const firebaseConfig = {
+            apiKey: "AIzaSyCLtLjrugtUvcnjQx6zURodCrKWUQJWWLk",
+            authDomain: "countdown33-f592c.firebaseapp.com",
+            projectId: "countdown33-f592c",
+            storageBucket: "countdown33-f592c.firebasestorage.app",
+            messagingSenderId: "494447142486",
+            appId: "1:494447142486:web:915871cda965317266fdf7",
+            measurementId: "G-NX5SQ4V8XH"
+        };
+        
+        const appId = firebaseConfig.projectId; // Using projectId as the application identifier
+        const initialAuthToken = null; // Token not used in public hosting environment
 
         let db = null;
         let auth = null;
@@ -239,7 +249,8 @@
 
         // Function to get the journal collection reference
         const getJournalCollectionRef = (uid) => {
-            const path = `artifacts/${appId}/users/${uid}/journal_entries`;
+            // Path structure: apps/countdown33-f592c/users/[uid]/journal_entries
+            const path = `apps/${appId}/users/${uid}/journal_entries`;
             return collection(db, path);
         };
         
@@ -283,6 +294,13 @@
 
         // --- AUTHENTICATION AND INITIALIZATION ---
         async function initializeFirebase() {
+            // Check if firebaseConfig is not an empty object {} before initializing
+            if (Object.keys(firebaseConfig).length === 0) {
+                 window.showToast("SYSTEM ALERT: Firebase Config Missing. Data functions disabled.", true);
+                 console.error("Initialization Failed: firebaseConfig is empty.");
+                 return; // Prevent crash
+            }
+
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -297,17 +315,13 @@
                         window.showToast("Data link established.", false);
                         loadJournalEntries(); // Start listening for data and run initial prompt check
                     } else {
-                        // Attempt sign-in if not authenticated
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
+                        // Use anonymous sign-in for persistence on the public site
+                        await signInAnonymously(auth);
                     }
                 });
             } catch (error) {
-                console.error("Firebase Initialization Error:", error);
-                window.showToast("SYSTEM ALERT: Initialization failed.", true);
+                console.error("Firebase Initialization Error (Fatal):", error);
+                window.showToast("SYSTEM ALERT: Initialization failed (Check Console).", true);
             }
         }
         
@@ -355,7 +369,6 @@
                 });
 
                 // --- Client-side sorting by timestamp (descending) ---
-                // Firestore data should be sorted client-side to avoid index missing issues.
                 entries.sort((a, b) => {
                     const timeA = a.timestamp ? (a.timestamp.toDate ? a.timestamp.toDate().getTime() : new Date(a.timestamp).getTime()) : 0;
                     const timeB = b.timestamp ? (b.timestamp.toDate ? b.timestamp.toDate().getTime() : new Date(b.timestamp).getTime()) : 0;
